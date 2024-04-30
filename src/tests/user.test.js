@@ -1,5 +1,6 @@
 const request = require("supertest")
 const app = require("../app")
+const { text } = require("express")
 
 const BASE_URL = '/api/v1/users'
 
@@ -59,6 +60,64 @@ test("PUT -> 'BASE_URL/:id', should return status code 200, res.body.lastName ==
 
   const userUpdate = {
     lastName:"Ramirez"
+
+  }
+  
+  const res = await request(app)
+    .put(`${BASE_URL}/${userId}`)
+    .send(userUpdate)
+    .set('Authorization', `Bearer ${TOKEN}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body).toBeDefined()
+    expect(res.body.lastName).toBe(userUpdate.lastName)
+ })
+
+ text("POST -> 'BASE_URL/login', should return statusCode 200, res.body.user.email === user.email and res.body.token to be defined", async()=>{
+
+  const user ={ 
+    email: "maicol@gmail.com",
+    password: "maicol1234"
   }
 
+  const res = await request(app)
+   .post(`${BASE_URL}/login`)
+   .send(user)
+
+   expect(res.statusCode).toBe(200)
+   expect(res.body).toBeDefined()
+   expect(res.body.user.email).toBe(user.email)
+   expect(res.body.token).toBeDefined()
  })
+
+// testeo de contraseña invalida
+text("POST 'BASE_URL/login', should return statusCode 401", async()=>{
+  
+    const userInvalid = {
+      email: "maicol@gmail.com",
+      password: "invali password"
+    }
+
+    const res = await request(app)
+     .post(`${BASE_URL}/login`)
+     .send(userInvalid)
+
+     expect(res.statusCode).toBe(401)
+
+
+  
+})
+
+text("DELETE ->'BASE_URL/:id', should return statusCode 204", async ()=>{
+  const res = await request(app)
+    .delete(`${BASE_URL}/${userId}`)
+
+    expect(res.statusCode).toBe(204)
+    .send('Authorization', `Bearer ${TOKEN}`)
+
+    expect(res.statusCode).toBe(204)
+
+
+})
+
+
